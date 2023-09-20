@@ -9,7 +9,7 @@ import numpy
 class Controller(object):
 
     def set(self, genome, n_inputs):
-        pass
+        genome
 
     def control(self, params, cont = None):
 
