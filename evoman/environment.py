@@ -390,7 +390,7 @@ class EnvironmentEA():
 
 
 
-            # default fitness function for single solutions
+    # default fitness function for single solutions
     def fitness_single(self):
         return 0.9*(100 - self.get_enemylife()) + 0.1*self.get_playerlife() - numpy.log(self.get_time())
 
@@ -619,31 +619,68 @@ class EnvironmentEA():
             return self.run_single(self.enemies[0],pcont,econt)
 
     def perform_action(self, action):
-        if action == "left":
-            return [1, 0, 0, 0, 0]
-        elif action == "right":
-            return [0, 1, 0, 0, 0]
-        elif action == "shoot":
-            return [0, 0, 0, 1, 0]
-        elif action == "jump":
-            return [0, 0, 1, 0, 0]
-        else:
-            raise ValueError("Action not recognized: {}".format(action))
+        print("Performing action", action)
+        print("XOD")
+
+        return 0
+        # return [left, right, jump, shoot, release]
+        return action
+        # if action == "left":
+        #     return [1, 0, 0, 0, 0]
+        # elif action == "right":
+        #     return [0, 1, 0, 0, 0]
+        # elif action == "shoot":
+        #     return [0, 0, 0, 1, 0]
+        # elif action == "jump":
+        #     return [0, 0, 1, 0, 0]
+        # else:
+        #     raise ValueError("Action not recognized: {}".format(action))
         
-    def evaluate_rollout(self, solution, discount_factor=0, ignore_frames=0):
-        print(solution)
-        print(solution.size)
-        print(len(solution))
-        print(numpy.max(solution))
-        print(numpy.argmax(solution))
-        i = numpy.argmax(solution)
-        print(solution[i])
+    def evaluate_rollout(self, solutions, discount_factor=0, ignore_frames=0):
+        # evaluate a bunch of solutions and give the best fitness back
+        print("Evaluating rollout")
+        print(solutions)
+        print(solutions.shape)
+        print(solutions.size)
+        print(len(solutions))
+        print(solutions[0])
+        print(solutions[0].size)
+        scores = []
+        for solution in solutions:
+            # generate fitness value for each solution
+            # simulate playing the game with the solution
+            
+            print("Solution", solution)
+            # score = solution.eval(self)
+            score = self.fitness_single()
+            scores += score * (1 - discount_factor)
+        # self.load_state()
+        return scores
+
+        sol = self.fitness_single() * (1 - discount_factor)
         print("X" * 50)
-        return solution
-        return numpy.max(solution)
+        print(solution)
+        return sol
+        # print(solution)
+        # print(solution.size)
+        # print(len(solution))
+        # print(numpy.max(solution))
+        # print(numpy.argmax(solution))
+        # i = numpy.argmax(solution)
+        # print(solution[i])
+        # print("X" * 50)
+        # print(self.fitness_single())
+        # print("X" * 50)
+        # return solution
+        # return numpy.max(solution)
 
     def get_random_action(self):
-        return self.pcont.control("XXX")
+        # action = [numpy.random.choice([0, 1]) for _ in range(2)]
+        action = numpy.random.choice([0, 1])
+        # action = [0] * 5
+        # action[numpy.random.randint(0, 5)] = 1
+        print("Random action", action)
+        return action
 
     def is_game_over(self):
         return self.player.life == 0 or self.enemy.life == 0
@@ -1045,7 +1082,7 @@ class Environment(object):
 
 
 
-            # default fitness function for single solutions
+    # default fitness function for single solutions
     def fitness_single(self):
         return 0.9*(100 - self.get_enemylife()) + 0.1*self.get_playerlife() - numpy.log(self.get_time())
 

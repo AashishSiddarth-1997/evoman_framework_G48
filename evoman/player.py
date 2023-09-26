@@ -173,6 +173,9 @@ class Player(pygame.sprite.Sprite):
         elif game.playermode == 'ai':  # player controlled by AI algorithm
 
             jump, left, release, right, shoot = self.ai_input(game)
+
+        # perform actions for RH
+
         return jump, left, release, right, shoot
 
     def update_animation(self, game, new):

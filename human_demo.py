@@ -11,6 +11,7 @@ import numpy as np
 from evoman.controller import Controller
 from evoman.environment import EnvironmentEA
 from RollingHorizonEA.rhea import RollingHorizonEvolutionaryAlgorithm
+from RollingHorizonEA import Environment
 # from RollingHorizonEA.environment import Environment
 
 experiment_name = 'ai'
@@ -28,11 +29,12 @@ if not os.path.exists(experiment_name):
 num_dims = 666
 m = 69
 num_evals = 100
-rollout_length = 10
+rollout_length = 5
 mutation_probability = 0.5
 
 # initializes environment with human player and static enemies
-for en in range(1, 9):
+# only skip enemy no. 5
+for en in [1, 2, 3, 4, 6, 7, 8]:
     # # Set up the problem domain as m-max game
     # env = EnvironmentEA(experiment_name=experiment_name,
     #                   enemymode='static',
@@ -65,14 +67,21 @@ for en in range(1, 9):
                         use_joystick=True,
                         playermode='ai',
                         player_controller=pcont,
-                        visuals=False)
+                        logs='on',
+                        visuals=True)
         
         env.update_parameter('enemies', [en])
-
         env.play(pcont=pcont)
 
         rhea = RollingHorizonEvolutionaryAlgorithm(rollout_length, env, mutation_probability, num_evals)
-
         rhea.run()
+
+        print("Fitness:", env.fitness_single())
+
+        
+
+        # rhea.
+
+        print("XXX")
 
 
