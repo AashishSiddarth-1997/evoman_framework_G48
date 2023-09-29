@@ -102,7 +102,7 @@ class Environment(object):
 
         # initializes pygame library
         pygame.init()
-        self.print_logs("MESSAGE: Pygame initialized for simulation.")
+        # self.print_logs("MESSAGE: Pygame initialized for simulation.")
 
         # initializes sound library for playing mode
         if self.sound == "on":
@@ -172,7 +172,7 @@ class Environment(object):
         else:
             exec('self.'+name +"= "+ str(value))
 
-        self.print_logs("PARAMETER CHANGE: "+name+" = "+str(value))
+        # self.print_logs("PARAMETER CHANGE: "+name+" = "+str(value))
 
 
 
