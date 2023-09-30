@@ -23,6 +23,7 @@ import time
 import glob
 import pygame
 import random
+import csv
 
 # random.seed(69)
 # np.random.seed(69)
@@ -31,7 +32,7 @@ config_file = 'config_neat.sh'
 
 experiment_name = 'test'
 
-NAME = "Run_Hidden_0rate"
+NAME = "Run_Hidden"
 
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
@@ -43,11 +44,12 @@ def eval_genomes(genomes, config, en=1, verbose=False):
     ge = []
     environments = []
 
+    global fitness_over_generations
+    fitness_over_generations = []
+
     if verbose:
         print("Enemy: ", en)
     for g, gen in genomes:
-        if verbose:
-            print("Generation: ", g)
         net = nn.FeedForwardNetwork.create(gen, config)
         nets.append(net)
 
@@ -62,7 +64,7 @@ def eval_genomes(genomes, config, en=1, verbose=False):
         env.update_parameter('enemies', [en])
         env.play()
 
-        gen.fitness = env.fitness_single()
+        gen.fitness = round(env.fitness_single(), 2)
         ge.append(gen)
         
         environments.append(env)
@@ -70,10 +72,13 @@ def eval_genomes(genomes, config, en=1, verbose=False):
             print("Finished enemy")
             print()
 
+        fitness_over_generations.append(gen.fitness)
+
 def save_genome(genome, enemy, filename):
+    global iteration
     cur_time = time.strftime("%H:%M:%S")
     fitness = round(genome.fitness, 2)
-    out_name = f"{filename}_E({enemy})_FIT({fitness})_T({cur_time}).txt"
+    out_name = f"{filename}_I({iteration})_E({enemy})_FIT({fitness})_T({cur_time}).txt"
     out_file = os.path.join("testLogs/", out_name)
     with open(out_file, 'wb') as f:
         pickle.dump(genome, f)
@@ -81,14 +86,15 @@ def save_genome(genome, enemy, filename):
 def run(config_path):
     # Load configuration.
     best_per_enemy = []
-    enemies = range(1, 9)
+    enemies = ENEMIES
+
     # eval_par = parallel.ParallelEvaluator(2, eval_genomes)
 
     # for en in enemies[:1]:
-    #     winner = p.run(eval_par.evaluate, en)
-    #     best_per_enemy.append(winner)
-    #     print("Best fitness -> {}".format(winner))
-    #     save_genome(winner, en, 'Test_111')
+    #     best_genome = p.run(eval_par.evaluate, en)
+    #     best_per_enemy.append(best_genome)
+    #     print("Best fitness -> {}".format(best_genome))
+    #     save_genome(best_genome, en, 'Test_111')
 
     verbose = False
 
@@ -103,14 +109,24 @@ def run(config_path):
         stats = StatisticsReporter()
         p.add_reporter(stats)
 
-        winner = p.run(eval_genomes, en, 30)
-        # best_genome = winner
-        best_per_gen.append(winner)
+        global fitness_over_generations
+        global fitness_per_enemy
+        best_genome = p.run(eval_genomes, en, GENERATIONS)
+        print("Enemy:", en)
+        print(fitness_over_generations)
+
+        mean_fitness = round(np.mean(fitness_over_generations), 2)
+        best_fitness = round(best_genome.fitness, 2)
+
+        save = {"Generations": fitness_over_generations, "Mean": mean_fitness, "Best": best_fitness}
+        fitness_per_enemy[en] = save
+
+        best_per_gen.append(best_genome)
 
         if verbose:
-            print("Best fitness -> {}".format(winner))
+            print("Best fitness -> {}".format(best_genome))
 
-        save_genome(winner, en, NAME)
+        save_genome(best_genome, en, NAME)
         # time.sleep(3)
         if verbose:
             print("Average fitness PER enemy -> {}".format(np.mean([x.fitness for x in best_per_gen])))
@@ -120,17 +136,57 @@ def run(config_path):
 
         if verbose:
             print("Best fitness PER enemy -> {}".format(best_per_gen))
-    
-    print("XXX")
+
+
+def plot_results(results):
+    # plot the results
+    plt.figure(figsize=(15, 10))
+    plt.title("Fitness over time")
+    plt.xlabel("Generations")
+    plt.ylabel("Fitness")
+    plt.plot(results)
+    plt.savefig("fitness_over_time.png")
+    plt.show()
+
+# Some global variables
+ITERATIONS = 10
+iteration = 1
+GENERATIONS = 30
+ENEMIES = [1, 2, 4]
+fitness_over_iterations = []
+fitness_over_generations = []
+fitness_per_enemy = {1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: []}
 
 # RUNNING THE GAME
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, "config_neat.sh")
-    run(config_path)
+    for i in range(ITERATIONS):
+        print("Iteration:", i)
+        iteration = i
+        run(config_path)
+        fitness_over_iterations.append(fitness_per_enemy)
+    
+    # save the results
+    # let's do CSV
+    file_save_res = f"testLogs/fitnesses_{time.strftime('%H:%M:%S')}.csv"
+    with open(file_save_res, 'w') as f:
+        csv_writer = csv.writer(f, dialect='excel')
+        header = ['Enemy', 'Iteration', 'Generation', 'Fitness', 'Mean', 'Best']
+        csv_writer.writerow(header)
+        for i in range(ITERATIONS):
+            for en in ENEMIES:
+                for gen in range(GENERATIONS):
+
+                    val_fit = fitness_over_iterations[i][en]["Generations"][gen]
+                    val_best = fitness_over_iterations[i][en]["Best"]
+                    val_mean = fitness_over_iterations[i][en]["Mean"]
+
+                    row = [en, i + 1, gen + 1, val_fit, val_mean, val_best]
+                    csv_writer.writerow(row)
 
     # get all files in the folder
-    files = glob.glob('testLogs/*')
+    files = glob.glob('testLogs/*.txt')
 
     # get the latest file
     latest_file = max(files, key=os.path.getctime)
