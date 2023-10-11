@@ -10,10 +10,6 @@ from extra.substrate import Substrate
 from extra.es_hyperneat import ESNetwork
 from extra.hyperneat import create_phenotype_network
 
-VERBOSE = True
-NEAT, ESNEAT = False, False
-PARALLEL_EVALS = multiprocessing.cpu_count()
-
 # # Determines whether NEAT or the simple NN is being used
 # NEAT = len(sys.argv) == 1
 # If more than one argument is given, then we use a modified version of NEAT
@@ -36,6 +32,11 @@ if len(sys.argv) > 1:
     VISUALS = bool(sys.argv[9])
     GENS = int(sys.argv[10])
     ITERATIONS = int(sys.argv[11])
+    PARALLEL = bool(sys.argv[12])
+
+VERBOSE = True
+NEAT, ESNEAT = False, False
+PARALLEL_EVALS = multiprocessing.cpu_count() if PARALLEL else None
 
 if VERBOSE:
     print("_" * 50)
@@ -50,6 +51,7 @@ if VERBOSE:
     print("Visuals: %s" % VISUALS)
     print("Generations: %s" % GENS)
     print("Iterations: %s" % ITERATIONS)
+    print("Parallel evaluations: %s" % PARALLEL_EVALS)
     print("_" * 50)
 
 # Holds the best genomes for each generation
@@ -92,7 +94,7 @@ def run(config):
     population.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     population.add_reporter(stats)
-    
+
     # Run for 10 generations
     # Use multiple evaluations in parallel
     if PARALLEL_EVALS:
