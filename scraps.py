@@ -89,14 +89,14 @@ os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 EXPERIMENT_NAME="Custom_generalist"
 PLAYER_MODE="ai"
-ENEMIES=[1,4,6]
+ENEMIES=[2,3,5,8]
 CONTROLLER=generalist()
 MULTI_MODE="yes"
 SPEED="fastest"
 ENEMY_MODE="static"
 LEVEL=2
 VISUALS=False
-GENS=30
+GENS=50
 ITERATIONS=10
 PARALLEL=False
 PARALLEL_EVALS=multiprocessing.cpu_count() // 2

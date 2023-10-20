@@ -16,7 +16,7 @@ from extra.hyperneat import create_phenotype_network
 # If more than one argument is given, then we use a modified version of NEAT
 # Setting up the arguments with their corresponding values
 
-VERBOSE = True
+VERBOSE = False
 USE_ARGS = True
 
 EXPERIMENT_NAME="Custom_generalist"
@@ -151,7 +151,7 @@ def eval_genome(genome, config):
     fitness = env.play(nn)[0]
 
     # Get the mean fitness of the population
-    print(genome)
+    # print(genome)
 
     return fitness
 
