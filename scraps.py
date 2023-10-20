@@ -33,7 +33,6 @@ def evaluate(genomes, config):
     best_genomes.append(best)
 
 def run(config):
-    global PARALLEL_EVALS
     # Create the population, which is the top-level object for a NEAT run.
     population = neat.Population(config)
     # Add a stdout reporter to show progress in the terminal.
@@ -98,9 +97,10 @@ LEVEL=2
 VISUALS=False
 GENS=50
 ITERATIONS=10
-PARALLEL=False
-PARALLEL_EVALS=multiprocessing.cpu_count() // 2
-NEAT, ESNEAT = False, False
+NEAT, ESNEAT = False, True
+
+# PARALLEL=False
+# PARALLEL_EVALS=multiprocessing.cpu_count() // 2
 
 env = Environment(experiment_name=EXPERIMENT_NAME,
               playermode=PLAYER_MODE,
@@ -114,10 +114,9 @@ env = Environment(experiment_name=EXPERIMENT_NAME,
               logs='off')
 
 best_genomes = []
-NEAT, ESNEAT = True, False
 ITER = 0
 
-OUT_PATH = f"{EXPERIMENT_NAME}_{''.join(map(str, ENEMIES))}_NEAT"
+OUT_PATH = f"{EXPERIMENT_NAME}_{''.join(map(str, ENEMIES))}_{'NEAT' if NEAT else 'ESNEAT'}"
 STATS_PATH = f"stats/{OUT_PATH}_stats.csv"
 CONFIG_PATH = 'configs/' + ('neat_generalist.cfg' if NEAT else 'esneat_generalist.cfg' if ESNEAT else 'custom_generalist.cfg')
 
@@ -128,7 +127,8 @@ with open(STATS_PATH, "w") as f:
 
 if __name__ == "__main__":
 
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, 'configs/custom_generalist.cfg')
+    cfg_file = f"configs/{'custom_generalist' if NEAT else 'esneat_generalist'}.cfg"
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, cfg_file)
 
     with ProcessPoolExecutor() as executor:
         executor.map(main, [(config, i) for i in range(ITERATIONS)])

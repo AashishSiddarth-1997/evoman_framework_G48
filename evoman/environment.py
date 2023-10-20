@@ -394,6 +394,8 @@ class Environment(object):
     # default fitness function for single solutions
     def fitness_single(self):
         # fitness = 100 - self.get_enemylife()
+        # Normalize enemy life so the more it drops, the more it matters
+        # enemy_life = 
         fitness = 0.85 * (100 - self.get_enemylife()) + 0.15 * self.get_playerlife() - numpy.log(self.get_time())
         return fitness
         # return 0.8 * (100 - self.get_enemylife()) + 0.2 * self.get_playerlife() - numpy.log(self.get_time())

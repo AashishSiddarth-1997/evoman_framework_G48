@@ -10,18 +10,18 @@ from extra.hyperneat import create_phenotype_network
 from extra.substrate import Substrate
 import csv
 
-# Whether we are training using HyperNeat or not
-"""# Make the module headless to run the simulation faster
-os.environ["SDL_VIDEODRIVER"] = "dummy"""
+# Run faster
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+
 # Initialize an environment for a specialist game (single objective) with a static enemy and an ai-controlled player
 
 NAME = 'Custom_generalist'
 # ENEMIES = [1,2,3,4,5,6,7,8]
 ENEMIES = range(1, 9)
 OPPONENT = "".join(map(str, ENEMIES))
-NEAT = True
+NEAT, ESNEAT = False, True
 ETRAIN = "146"
-ITER = 4
+ITER = 6
 
 if type(ENEMIES) == list:
     MULTI = "yes"
@@ -51,11 +51,13 @@ if __name__ == "__main__":
               enemymode="static",
               level=2,
               visuals=False)
+        
+        print("Enemy", e)
 
         for i in range(0, 5):
             # Initialize the NEAT config 
             config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, 'configs/' + ('custom_generalist.cfg' if NEAT else 'esneat_generalist.cfg'))
-            winner_name = f"{NAME}_{ETRAIN}_NEAT_{ITER}"
+            winner_name = f"{NAME}_{ETRAIN}_{'NEAT' if NEAT else 'ESNEAT'}_{ITER}"
             with open(f"winners/{winner_name}_winner.pkl", "rb") as f:
                 unpickler = pickle.Unpickler(f)
                 genome = unpickler.load()
@@ -67,11 +69,14 @@ if __name__ == "__main__":
                 cppn = neat.nn.FeedForwardNetwork.create(genome, config)
                 network = ESNetwork(sub, cppn)
                 nn = network.create_phenotype_network()
+
+            print("Iteration", i)
         
             a = env.play(nn)
             print(a)
 
             gain = a[1] - a[2]
+            print(gain)
 
             w_csv.writerow([NAME, f"{ETRAIN}_{ITER}", e, i, gain])
 
