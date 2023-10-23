@@ -39,7 +39,7 @@ GENS = 25
 if __name__ == "__main__":
     for g in ['146', '2358']:
         # Gather paths
-        paths = glob(r"stats/GOODS/*{}*".format(g))
+        paths = glob(r"stats/*{}*".format(g))
         # Initialize std lists
         std_mean_gens1=[]
         std_max_gens1=[]
@@ -55,7 +55,7 @@ if __name__ == "__main__":
         names=[]
 
         for i in paths:
-            name = (i.split("/"))[2]
+            name = (i.split("/"))[1]
 
             if "ESNEAT" in name:
                 NEAT, ESNEAT = False, True
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
             names.append(f"{'NEAT' if NEAT else 'HYPERNEAT'} {group}")
 
-            df = pd.read_csv(f"/Users/duculet/evoman_framework_G48/stats/GOODS/{name}")
+            df = pd.read_csv(f"/Users/duculet/evoman_framework_G48/stats/{name}")
             
             mean_gens=[]
             max_gens=[]
